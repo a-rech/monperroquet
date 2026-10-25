@@ -4,17 +4,19 @@
 <meta name="theme-color" content="#9b6bff"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png">
 <title>Perroquitos</title>
 <style>
-:root{--bg:#f4f1ff;--ink:#2a2340;--c0:#ff6b6b;--c1:#ffb020;--c2:#2ec4a0;--c3:#3d8bfd;--c4:#9b6bff;--c5:#ff7eb6;color-scheme:light}
+:root{--bg:#f4f1ff;--ink:#2a2340;--c0:#ff6b6b;--c1:#ffb020;--c2:#2ec4a0;--c3:#3d8bfd;--c4:#9b6bff;--c5:#ff7eb6;--card:#fff;--sh:#d9d2f5;--soft:#f4f1ff;--bd:#e3dcfa;--gb:#e9e4fb;color-scheme:light}
+:root[data-th=dark]{--bg:#1b1730;--ink:#f1edff;--card:#2a2445;--sh:#120f22;--soft:#241f3d;--bd:#3a3360;--gb:#3a3360;color-scheme:dark}
+@media(prefers-color-scheme:dark){:root[data-th=auto]{--bg:#1b1730;--ink:#f1edff;--card:#2a2445;--sh:#120f22;--soft:#241f3d;--bd:#3a3360;--gb:#3a3360;color-scheme:dark}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;background:var(--bg);color:var(--ink);font:16px "Trebuchet MS",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 90px}
 header{display:flex;justify-content:space-between;align-items:center;padding:12px 16px}
 h1{margin:0;font-size:1.5rem}
 button,select,input{font:inherit;color:inherit}
-.ib{background:#fff;border:0;border-radius:14px;width:44px;height:44px;font-size:1.3rem;margin-left:8px;box-shadow:0 2px 0 #d9d2f5}
+.ib{background:var(--card);border:0;border-radius:14px;width:44px;height:44px;font-size:1.3rem;margin-left:8px;box-shadow:0 2px 0 #d9d2f5}
 .ib.on{background:var(--c1)}
 nav{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px}
-.chip{flex:none;border:0;border-radius:20px;padding:8px 16px;background:#fff;box-shadow:0 2px 0 #d9d2f5}
-.chip.on{background:var(--ink);color:#fff}
+.chip{flex:none;border:0;border-radius:20px;padding:8px 16px;background:var(--card);box-shadow:0 2px 0 #d9d2f5}
+.chip.on{background:var(--ink);color:var(--bg)}
 #grid{display:grid;gap:12px;padding:0 16px;grid-template-columns:repeat(var(--n,3),1fr)}
 .tile{aspect-ratio:1;border:0;border-radius:22px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;box-shadow:0 5px 0 rgba(0,0,0,.18);user-select:none}
 .tile:active,.tile.hit{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
@@ -24,21 +26,22 @@ nav{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px}
 .edit .tile{touch-action:none;outline:3px dashed rgba(255,255,255,.8);outline-offset:-8px}
 .tile.drag{z-index:5;opacity:.8;position:relative}
 #add{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:64px;height:64px;border:0;border-radius:50%;background:var(--c0);color:#fff;font-size:2rem;box-shadow:0 5px 0 rgba(0,0,0,.2)}
-#ed{position:fixed;left:18px;bottom:calc(26px + env(safe-area-inset-bottom));width:48px;height:48px;border:0;border-radius:50%;background:#fff;font-size:1.3rem;box-shadow:0 4px 0 #d9d2f5}
+#ed{position:fixed;left:18px;bottom:calc(26px + env(safe-area-inset-bottom));width:48px;height:48px;border:0;border-radius:50%;background:var(--card);font-size:1.3rem;box-shadow:0 4px 0 #d9d2f5}
 #ed.on{background:var(--c1)}
 #ban{margin:0 16px 12px;padding:10px 14px;background:var(--c1);border-radius:14px;font-weight:700}
 .empty{grid-column:1/-1;text-align:center;padding:40px 10px;opacity:.7}
-dialog{border:0;border-radius:24px;width:min(92vw,440px);padding:18px;color:var(--ink)}
+dialog{background:var(--card);max-height:88vh;border:0;border-radius:24px;width:min(92vw,440px);padding:18px;color:var(--ink)}
 dialog::backdrop{background:rgba(42,35,64,.5)}
 dialog h2{margin:0 0 12px;font-size:1.2rem}
 label{display:block;margin:10px 0 4px;font-weight:700;font-size:.9rem}
-input[type=text],select{width:100%;padding:10px;border:2px solid #e3dcfa;border-radius:12px;background:#fff}
+input[type=text],select{width:100%;padding:10px;border:2px solid var(--bd);border-radius:12px;background:var(--card)}
 .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
 .btn{border:0;border-radius:12px;padding:10px 14px;background:var(--c3);color:#fff;font-weight:700}
-.btn.g{background:#e9e4fb;color:var(--ink)}.btn.r{background:var(--c0)}.btn.v{background:var(--c2)}
-canvas{width:100%;height:80px;background:#f4f1ff;border-radius:12px;display:block}
+.btn.g{background:var(--gb);color:var(--ink)}.btn.r{background:var(--c0)}.btn.v{background:var(--c2)}
+canvas{width:100%;height:80px;background:var(--soft);border-radius:12px;display:block}
 input[type=range]{width:100%;accent-color:var(--c4)}
-.em{font-size:1.5rem;background:#f4f1ff;border:0;border-radius:10px;width:42px;height:42px}
+.em{font-size:1.5rem;background:var(--soft);border:0;border-radius:10px;width:42px;height:42px}
+section a{color:var(--c3)}
 small{opacity:.7;display:block;margin-top:6px}
 </style></head><body>
 <header><h1>🦜 Perroquitos</h1><div><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
@@ -57,28 +60,40 @@ small{opacity:.7;display:block;margin-top:6px}
 <div class="row"><button class="btn" id="sv">Enregistrer</button><button class="btn g" id="cx">Annuler</button><button class="btn g" id="shr">📤 Partager</button><button class="btn r" id="dl" hidden>Supprimer</button></div></dialog>
 
 <dialog id="dS"><h2>Réglages</h2>
-<label>Quand on touche un bouton déjà en lecture</label>
+<div id="stabs" class="row" style="margin:0 0 6px"><button class="chip" data-t="son">🔊 Son</button><button class="chip" data-t="aff">🎨 Affichage</button><button class="chip" data-t="int">✋ Interaction</button><button class="chip" data-t="sav">💾 Sauvegardes</button><button class="chip" data-t="inf">ℹ️ À propos</button></div>
+<section data-t="son"><label>Quand on touche un bouton déjà en lecture</label>
 <select id="mo"><option value="restart">Rejouer depuis le début</option><option value="stop">Arrêter le son</option><option value="overlap">Superposer</option></select>
-<label>Volume général</label><input type="range" id="mv" min="0" max="100"><label><input type="checkbox" id="vb"> Vibration au toucher</label><small>Le volume média d’Android reste prioritaire : si tu n’entends rien, monte-le avec les touches de volume du téléphone (le mode sonnerie silencieux ne coupe pas les médias).</small><label>Colonnes</label><select id="nc"><option>2</option><option>3</option><option>4</option><option>5</option></select>
-<label>Sauvegarde</label>
-<div class="row"><button class="btn" id="ex">Exporter (.json)</button><button class="btn g" id="im">Importer</button><input type="file" id="jf" accept=".json,application/json" hidden></div>
-<div class="row"><select id="xc" style="flex:1"></select><button class="btn" id="xp">Exporter la catégorie</button></div><div class="row"><button class="btn v" id="sn">Sauvegarde interne</button><button class="btn g" id="rs">Restaurer</button></div>
+<label>Sons simultanés (maximum)</label><select id="mx"><option value="0">Illimité</option><option>1</option><option>2</option><option>3</option><option>5</option><option>8</option></select>
+<label>Volume général</label><input type="range" id="mv" min="0" max="100"><small>Le volume média d’Android reste prioritaire : si tu n’entends rien, monte-le avec les touches de volume du téléphone (le mode sonnerie silencieux ne coupe pas les médias).</small>
+<div class="row"><button class="btn g" id="sa">⏹ Tout arrêter</button></div></section>
+<section data-t="aff"><label>Thème</label><select id="th"><option value="auto">Automatique (comme le téléphone)</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
+<label>Palette des catégories</label><select id="pl"><option value="vif">Vif</option><option value="pastel">Pastel</option><option value="ocean">Océan</option><option value="foret">Forêt</option><option value="sunset">Coucher de soleil</option></select>
+<label>Colonnes</label><select id="nc"><option>2</option><option>3</option><option>4</option><option>5</option></select></section>
+<section data-t="int"><label><input type="checkbox" id="vb"> Vibration au toucher</label>
+<label><input type="checkbox" id="wk"> Garder l’écran allumé</label>
+<label><input type="checkbox" id="cf"> Confirmer avant de supprimer</label></section>
+<section data-t="sav"><div class="row"><button class="btn" id="ex">Exporter (.json)</button><button class="btn g" id="im">Importer</button><input type="file" id="jf" accept=".json,application/json" hidden></div>
+<div class="row"><select id="xc" style="flex:1"></select><button class="btn" id="xp">Exporter la catégorie</button></div>
+<div class="row"><button class="btn v" id="sn">Sauvegarde interne</button><button class="btn g" id="rs">Restaurer</button></div>
 <small id="inf"></small>
-<small>La sauvegarde interne garde une seule version (elle remplace la précédente) mais reste dans le navigateur : exporte aussi un fichier .json régulièrement et garde-le hors du téléphone. L’import fusionne avec les sons existants.</small>
-<div class="row"><button class="btn g" id="sa">⏹ Tout arrêter</button><button class="btn g" id="cl">Fermer</button></div></dialog>
+<small>La sauvegarde interne garde une seule version (elle remplace la précédente) mais reste dans le navigateur : exporte aussi un fichier .json régulièrement et garde-le hors du téléphone. L’import fusionne avec les sons existants.</small></section>
+<section data-t="inf"><p>🦜 <b>Perroquitos</b> · version 1.1</p><p><a href="https://github.com/a-rech/monperroquet" target="_blank" rel="noopener">Code source sur GitHub</a></p>
+<div class="row"><button class="btn" id="up">↻ Mettre à jour l’appli</button></div><small>Recharge la dernière version depuis internet. Tes sons ne sont pas touchés.</small></section>
+<div class="row"><button class="btn g" id="cl">Fermer</button></div></dialog>
 
 <script>
 const $=s=>document.querySelector(s);
-const COL=["#ff6b6b","#ffb020","#2ec4a0","#3d8bfd","#9b6bff","#ff7eb6"];
+const PALS={vif:["#ff6b6b","#ffb020","#2ec4a0","#3d8bfd","#9b6bff","#ff7eb6"],pastel:["#ff8fa3","#ffc971","#7fd8be","#7fb3ff","#b79cff","#ffaad4"],ocean:["#0077b6","#00b4d8","#2a9d8f","#3a86ff","#5e60ce","#48a9a6"],foret:["#2d6a4f","#52b788","#8a9a2b","#bc6c25","#8d6e63","#606c38"],sunset:["#f94144","#f3722c","#f8961e","#d4a017","#c9184a","#9d4edd"]};
+let COL=PALS.vif;
 // Tailles par nombre de colonnes : [taille emoji en rem, taille du nom en rem]
 const TAILLE={2:[3.6,.95],3:[2.4,.8],4:[1.8,.7],5:[1.4,.62]};
 const EMO="🔔🎺🥁👏😂😱🐶🐱🚗💥🎉🎸🔥👍❓".match(/./gu);
-let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0,vol:1,mute:false,vib:true},sounds=[],cur="all",edit=false,buf={},ctx,playing=[];
+let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0,vol:1,vib:true,theme:"auto",pal:"vif",max:0,wake:false,conf:true},sounds=[],cur="all",edit=false,buf={},ctx,playing=[];
 const open=()=>new Promise((r,j)=>{const q=indexedDB.open("sb",1);q.onupgradeneeded=()=>["sounds","kv","snap"].forEach(n=>q.result.createObjectStore(n,{keyPath:"id"}));q.onsuccess=()=>r(q.result);q.onerror=j});
 const tx=(s,m,f)=>new Promise((r,j)=>{const t=db.transaction(s,m),o=f(t.objectStore(s));t.oncomplete=()=>r(o.result);t.onerror=j});
 const put=(s,v)=>tx(s,"readwrite",o=>o.put(v)),del=(s,k)=>tx(s,"readwrite",o=>o.delete(k)),all=s=>tx(s,"readonly",o=>o.getAll()),get=(s,k)=>tx(s,"readonly",o=>o.get(k));
 const save=()=>put("kv",S);
-const uid=()=>crypto.randomUUID();
+const uid=()=>crypto.randomUUID(),ok=m=>!S.conf||confirm(m);
 let mg;const vol=()=>{if(mg)mg.gain.value=S.vol};
 const ac=()=>{if(!ctx){ctx=new AudioContext();mg=ctx.createGain();mg.connect(ctx.destination);vol()}ctx.resume();return ctx};
 const decode=async b=>ac().decodeAudioData(await b.arrayBuffer());
@@ -96,6 +111,7 @@ async function play(s,tile){
   if(S.vib)navigator.vibrate?.(15);
   let b;try{b=s.blob&&await bufOf(s)}catch{}
   if(!b){if(confirm("Ce bouton n’a pas encore de son (ou il est illisible). Ajouter un son ?"))openEd(s);return}
+  while(S.max&&playing.length>=S.max)playing.shift().src.stop();
   const same=playing.filter(p=>p.id===s.id);
   if(S.mode!=="overlap"&&same.length){same.forEach(p=>p.src.stop());if(S.mode==="stop")return}
   go(b,s,s.id,tile);
@@ -141,7 +157,7 @@ async function newCat(){const n=prompt("Nom de la catégorie ?");if(!n)return;S.
 async function editCat(){
   const c=S.cats.find(c=>c.id===cur);if(!c)return;
   const n=prompt("Nom (laisser vide pour supprimer la catégorie)",c.name);if(n===null)return;
-  if(n===""){if(!confirm("Supprimer « "+c.name+" » ? Les sons passent dans une autre catégorie."))return;
+  if(n===""){if(!ok("Supprimer « "+c.name+" » ? Les sons passent dans une autre catégorie."))return;
     S.cats=S.cats.filter(x=>x.id!==c.id);if(!S.cats.length)S.cats.push({id:uid(),name:"Favoris",col:0});
     for(const s of sounds.filter(s=>s.cat===c.id)){s.cat=S.cats[0].id;await put("sounds",s)}cur="all"}
   else{c.name=n.slice(0,20);if(confirm("Changer la couleur ?"))c.col=(c.col+1)%6}
@@ -192,7 +208,7 @@ $("#sv").onclick=async()=>{
   if(ed.order==null)ed.order=Math.max(-1,...sounds.map(s=>s.order))+1;
   await put("sounds",ed);delete buf[ed.id];sounds=await all("sounds");dE.close();render();
 };
-$("#dl").onclick=async()=>{if(!confirm("Supprimer ce son ?"))return;await del("sounds",ed.id);sounds=await all("sounds");dE.close();render()};
+$("#dl").onclick=async()=>{if(!ok("Supprimer ce son ?"))return;await del("sounds",ed.id);sounds=await all("sounds");dE.close();render()};
 
 function wav(b,a,e){const sr=b.sampleRate,i0=Math.floor(a*sr),n=Math.floor(e*sr)-i0,ch=Math.min(b.numberOfChannels,2),o=new DataView(new ArrayBuffer(44+n*ch*2));
   const w=(p,s)=>[...s].forEach((c,i)=>o.setUint8(p+i,c.charCodeAt(0)));
@@ -207,7 +223,19 @@ $("#vb").onchange=()=>{S.vib=$("#vb").checked;save()};
 
 /* réglages et sauvegardes */
 const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
-async function openSet(){
+let curTab="son",lock;
+function tab(t){curTab=t;document.querySelectorAll("#dS section").forEach(s=>s.hidden=s.dataset.t!==t);document.querySelectorAll("#stabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t))}
+$("#stabs").onclick=e=>{if(e.target.dataset.t)tab(e.target.dataset.t)};
+async function wl(){try{if(S.wake&&navigator.wakeLock&&document.visibilityState==="visible"&&!lock){lock=await navigator.wakeLock.request("screen");lock.onrelease=()=>lock=null}else if(!S.wake&&lock){await lock.release();lock=null}}catch{}}
+document.onvisibilitychange=wl;
+$("#th").onchange=async e=>{S.theme=e.target.value;document.documentElement.dataset.th=S.theme;await save()};
+$("#pl").onchange=async e=>{S.pal=e.target.value;COL=PALS[S.pal];await save();render()};
+$("#mx").onchange=async e=>{S.max=+e.target.value;await save()};
+$("#wk").onchange=async e=>{S.wake=e.target.checked;await save();wl()};
+$("#cf").onchange=async e=>{S.conf=e.target.checked;await save()};
+$("#up").onclick=async()=>{if(!confirm("Recharger la dernière version de l’appli ? Tes sons ne sont pas touchés."))return;
+  try{const r=await navigator.serviceWorker?.getRegistration();await r?.unregister();for(const k of await caches.keys())await caches.delete(k)}catch{}location.reload()};
+async function openSet(){$("#th").value=S.theme;$("#pl").value=S.pal;$("#mx").value=S.max;$("#wk").checked=S.wake;$("#cf").checked=S.conf;tab(curTab);
   $("#mo").value=S.mode;$("#nc").value=S.cols;$("#mv").value=S.vol*100;$("#vb").checked=S.vib;$("#xc").innerHTML="";S.cats.forEach(c=>$("#xc").add(new Option(c.name,c.id)));if(cur!=="all")$("#xc").value=cur;
   const e=await navigator.storage?.estimate?.();
   $("#inf").textContent=`${sounds.length} sons`+(e?` · ${(e.usage/1e6).toFixed(1)} Mo utilisés`:"")+(S.last?` · dernier export : ${new Date(S.last).toLocaleDateString("fr-FR")}`:" · aucun export");
@@ -242,6 +270,7 @@ $("#rs").onclick=async()=>{
 
 (async()=>{
   db=await open();S={...S,...(await get("kv","state")||{})};sounds=await all("sounds");
+  COL=PALS[S.pal]||PALS.vif;document.documentElement.dataset.th=S.theme;wl();
   navigator.storage?.persist?.();render();
   if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js");
 })();

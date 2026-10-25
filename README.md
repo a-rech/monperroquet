@@ -13,6 +13,9 @@ Une petite application web (PWA) de soundboard : chaque bouton rejoue un son que
 - Mode édition (✏️) : glisser-déposer pour réorganiser, toucher un bouton pour le modifier
 - Comportement quand on touche un bouton déjà en lecture, au choix : rejouer, arrêter ou superposer
 - Nombre de colonnes réglable
+- Volume général, bouton muet, fondus d’entrée et de sortie par son, vibration au toucher
+- Boutons sans son : un appui propose d’en ajouter un
+- Partage d’un extrait vers une autre appli Android (fichier .wav)
 - Fonctionne hors ligne une fois installée
 
 ## Installation
@@ -25,6 +28,7 @@ Une petite application web (PWA) de soundboard : chaque bouton rejoue un son que
 Les sons sont stockés dans IndexedDB, dans le navigateur de l’appareil. Cela signifie que **effacer les données du site ou désinstaller le navigateur supprime les sons**. Pour ne rien perdre :
 
 - **Exporter (.json)** : réglages ⚙️, puis « Exporter ». Le fichier contient tous les sons et catégories. À conserver hors du téléphone (cloud, ordinateur).
+- **Exporter une catégorie** : même principe, pour une seule catégorie.
 - **Importer** : fusionne un fichier exporté avec les sons déjà présents.
 - **Sauvegarde interne** : une seule copie, stockée dans le navigateur, qui remplace la précédente à chaque fois. Pratique pour revenir en arrière, mais elle ne protège pas contre un effacement des données du site.
 - Un bandeau de rappel apparaît si le dernier export date de plus de 14 jours.
@@ -40,7 +44,7 @@ Le projet est statique : il suffit de pousser les fichiers à la racine du dép�
 | `sw.js` | Service worker pour le mode hors ligne |
 | `icon-192.png`, `icon-512.png` | Icônes |
 
-Après une modification, change le numéro de version du cache dans `sw.js` (`sb-v2`, `sb-v3`…) pour que les appareils déjà installés récupèrent la mise à jour.
+Après une modification, change le numéro de version du cache dans `sw.js` (`sb-v3`, `sb-v4`…) pour que les appareils déjà installés récupèrent la mise à jour.
 
 ## Technique
 

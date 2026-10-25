@@ -20,6 +20,7 @@ nav{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px}
 .tile:active,.tile.hit{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
 .tile b{font-size:2.4rem;font-weight:400;line-height:1}
 .tile span{font-size:.8rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile.vide{opacity:.55}
 .edit .tile{touch-action:none;outline:3px dashed rgba(255,255,255,.8);outline-offset:-8px}
 .tile.drag{z-index:5;opacity:.8;position:relative}
 #add{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:64px;height:64px;border:0;border-radius:50%;background:var(--c0);color:#fff;font-size:2rem;box-shadow:0 5px 0 rgba(0,0,0,.2)}
@@ -38,7 +39,7 @@ input[type=range]{width:100%;accent-color:var(--c4)}
 .em{font-size:1.5rem;background:#f4f1ff;border:0;border-radius:10px;width:42px;height:42px}
 small{opacity:.7;display:block;margin-top:6px}
 </style></head><body>
-<header><h1>🦜 Mon Perroquet</h1><div><button class="ib" id="ed" title="Modifier">✏️</button><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
+<header><h1>🦜 Mon Perroquet</h1><div><button class="ib" id="mu" title="Muet">🔊</button><button class="ib" id="ed" title="Modifier">✏️</button><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
 <div id="ban" hidden></div><nav id="tabs"></nav><main id="grid"></main><button id="add" aria-label="Ajouter un son">＋</button>
 
 <dialog id="dE"><h2 id="eT">Nouveau son</h2>
@@ -50,16 +51,16 @@ small{opacity:.7;display:block;margin-top:6px}
 <label>Nom</label><input type="text" id="nm" maxlength="30">
 <label>Emoji</label><div class="row" style="align-items:center"><input type="text" id="em" maxlength="4" style="width:70px;font-size:1.5rem;text-align:center"><span id="ems"></span></div>
 <label>Catégorie</label><select id="ct"></select>
-<label>Volume</label><input type="range" id="vo" min="10" max="100" value="100">
-<div class="row"><button class="btn" id="sv">Enregistrer</button><button class="btn g" id="cx">Annuler</button><button class="btn r" id="dl" hidden>Supprimer</button></div></dialog>
+<label>Volume</label><input type="range" id="vo" min="10" max="100" value="100"><label>Fondu d’entrée</label><input type="range" id="fi" min="0" max="20" value="0"><label>Fondu de sortie</label><input type="range" id="fo" min="0" max="20" value="0">
+<div class="row"><button class="btn" id="sv">Enregistrer</button><button class="btn g" id="cx">Annuler</button><button class="btn g" id="shr">📤 Partager</button><button class="btn r" id="dl" hidden>Supprimer</button></div></dialog>
 
 <dialog id="dS"><h2>Réglages</h2>
 <label>Quand on touche un bouton déjà en lecture</label>
 <select id="mo"><option value="restart">Rejouer depuis le début</option><option value="stop">Arrêter le son</option><option value="overlap">Superposer</option></select>
-<label>Colonnes</label><select id="nc"><option>2</option><option>3</option><option>4</option><option>5</option></select>
+<label>Volume général</label><input type="range" id="mv" min="0" max="100"><label><input type="checkbox" id="vb"> Vibration au toucher</label><small>Le volume média d’Android reste prioritaire : si tu n’entends rien, monte-le avec les touches de volume du téléphone (le mode sonnerie silencieux ne coupe pas les médias).</small><label>Colonnes</label><select id="nc"><option>2</option><option>3</option><option>4</option><option>5</option></select>
 <label>Sauvegarde</label>
 <div class="row"><button class="btn" id="ex">Exporter (.json)</button><button class="btn g" id="im">Importer</button><input type="file" id="jf" accept=".json,application/json" hidden></div>
-<div class="row"><button class="btn v" id="sn">Sauvegarde interne</button><button class="btn g" id="rs">Restaurer</button></div>
+<div class="row"><select id="xc" style="flex:1"></select><button class="btn" id="xp">Exporter la catégorie</button></div><div class="row"><button class="btn v" id="sn">Sauvegarde interne</button><button class="btn g" id="rs">Restaurer</button></div>
 <small id="inf"></small>
 <small>La sauvegarde interne garde une seule version (elle remplace la précédente) mais reste dans le navigateur : exporte aussi un fichier .json régulièrement et garde-le hors du téléphone. L’import fusionne avec les sons existants.</small>
 <div class="row"><button class="btn g" id="sa">⏹ Tout arrêter</button><button class="btn g" id="cl">Fermer</button></div></dialog>
@@ -68,24 +69,32 @@ small{opacity:.7;display:block;margin-top:6px}
 const $=s=>document.querySelector(s);
 const COL=["#ff6b6b","#ffb020","#2ec4a0","#3d8bfd","#9b6bff","#ff7eb6"];
 const EMO="🔔🎺🥁👏😂😱🐶🐱🚗💥🎉🎸🔥👍❓".match(/./gu);
-let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0},sounds=[],cur="all",edit=false,buf={},ctx,playing=[];
+let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0,vol:1,mute:false,vib:true},sounds=[],cur="all",edit=false,buf={},ctx,playing=[];
 const open=()=>new Promise((r,j)=>{const q=indexedDB.open("sb",1);q.onupgradeneeded=()=>["sounds","kv","snap"].forEach(n=>q.result.createObjectStore(n,{keyPath:"id"}));q.onsuccess=()=>r(q.result);q.onerror=j});
 const tx=(s,m,f)=>new Promise((r,j)=>{const t=db.transaction(s,m),o=f(t.objectStore(s));t.oncomplete=()=>r(o.result);t.onerror=j});
 const put=(s,v)=>tx(s,"readwrite",o=>o.put(v)),del=(s,k)=>tx(s,"readwrite",o=>o.delete(k)),all=s=>tx(s,"readonly",o=>o.getAll()),get=(s,k)=>tx(s,"readonly",o=>o.get(k));
 const save=()=>put("kv",S);
 const uid=()=>crypto.randomUUID();
-const ac=()=>{ctx=ctx||new AudioContext();ctx.resume();return ctx};
+let mg;const vol=()=>{if(mg)mg.gain.value=S.mute?0:S.vol};
+const ac=()=>{if(!ctx){ctx=new AudioContext();mg=ctx.createGain();mg.connect(ctx.destination);vol()}ctx.resume();return ctx};
 const decode=async b=>ac().decodeAudioData(await b.arrayBuffer());
 const bufOf=async s=>buf[s.id]||(buf[s.id]=await decode(s.blob));
 
+function go(b,o,id,tile){
+  const src=ac().createBufferSource(),g=ctx.createGain(),a=o.a||0,e=o.e||b.duration,d=Math.max(.05,e-a),v=o.vol??1,fi=Math.min(o.fi||0,d/2),fo=Math.min(o.fo||0,d/2),t=ctx.currentTime;
+  src.buffer=b;src.connect(g).connect(mg);g.gain.setValueAtTime(fi?0:v,t);
+  if(fi)g.gain.linearRampToValueAtTime(v,t+fi);
+  if(fo){g.gain.setValueAtTime(v,t+d-fo);g.gain.linearRampToValueAtTime(0,t+d)}
+  const p={id,src};playing.push(p);tile?.classList.add("hit");
+  src.onended=()=>{playing=playing.filter(x=>x!==p);tile?.classList.remove("hit")};src.start(t,a,d);
+}
 async function play(s,tile){
+  if(S.vib)navigator.vibrate?.(15);
+  let b;try{b=s.blob&&await bufOf(s)}catch{}
+  if(!b){if(confirm("Ce bouton n’a pas encore de son (ou il est illisible). Ajouter un son ?"))openEd(s);return}
   const same=playing.filter(p=>p.id===s.id);
   if(S.mode!=="overlap"&&same.length){same.forEach(p=>p.src.stop());if(S.mode==="stop")return}
-  const b=await bufOf(s),src=ac().createBufferSource(),g=ctx.createGain();
-  src.buffer=b;g.gain.value=s.vol??1;src.connect(g).connect(ctx.destination);
-  const a=s.a||0,e=s.e||b.duration,p={id:s.id,src};
-  playing.push(p);src.onended=()=>{playing=playing.filter(x=>x!==p);tile?.classList.remove("hit")};
-  tile?.classList.add("hit");src.start(0,a,Math.max(.05,e-a));
+  go(b,s,s.id,tile);
 }
 
 function render(){
@@ -101,11 +110,11 @@ function render(){
   if(!list.length){g.innerHTML='<p class="empty">Aucun son ici.<br>Touche ＋ pour enregistrer ou importer.</p>'}
   list.forEach(s=>{
     const c=S.cats.find(c=>c.id===s.cat),b=document.createElement("button");
-    b.className="tile";b.dataset.id=s.id;b.style.background=COL[c?c.col:4];
+    b.className="tile"+(s.blob?"":" vide");b.dataset.id=s.id;b.style.background=COL[c?c.col:4];
     b.innerHTML="<b></b><span></span>";b.firstChild.textContent=s.emoji||"🔊";b.lastChild.textContent=s.name||"";
     b.onclick=()=>{if(!edit)play(s,b)};drag(b,s);g.append(b);
   });
-  $("#ed").classList.toggle("on",edit);
+  $("#ed").classList.toggle("on",edit);$("#mu").textContent=S.mute?"🔇":"🔊";
   const old=sounds.length&&Date.now()-S.last>14*864e5;
   $("#ban").hidden=!old;$("#ban").textContent="💾 Pense à faire une sauvegarde (réglages ⚙️)";
 }
@@ -154,10 +163,10 @@ $("#rb").oninput=()=>{if(+$("#rb").value<+$("#ra").value+5)$("#rb").value=+$("#r
 function openEd(s){
   ed=s?{...s}:{id:uid(),a:0,e:0};cb=cbuf=null;
   $("#eT").textContent=s?"Modifier le son":"Nouveau son";
-  $("#nm").value=s?.name||"";$("#em").value=s?.emoji||"🔔";$("#vo").value=(s?.vol??1)*100;
+  $("#nm").value=s?.name||"";$("#em").value=s?.emoji||"🔔";$("#vo").value=(s?.vol??1)*100;$("#fi").value=(s?.fi||0)*10;$("#fo").value=(s?.fo||0)*10;$("#shr").hidden=!navigator.canShare;
   fillCats(s?.cat||(cur!=="all"?cur:S.cats[0].id));$("#dl").hidden=!s;
   $("#ra").value=0;$("#rb").value=1000;draw();$("#dur").textContent="";
-  if(s)setBlob(s.blob);dE.showModal();
+  if(s?.blob)setBlob(s.blob);dE.showModal();
 }
 $("#add").onclick=()=>openEd();
 $("#ed").onclick=()=>{edit=!edit;render()};
@@ -170,21 +179,33 @@ $("#rec").onclick=async()=>{
     mr.onstop=async()=>{st.getTracks().forEach(t=>t.stop());$("#rec").textContent="● Enregistrer";ed.a=ed.e=0;await setBlob(new Blob(chunks,{type:mr.mimeType}))};
     mr.start();$("#rec").textContent="■ Arrêter"}catch{alert("Micro non autorisé.")}
 };
-$("#pre").onclick=()=>{if(!cbuf)return;const s=ac().createBufferSource(),g=ctx.createGain();s.buffer=cbuf;g.gain.value=$("#vo").value/100;s.connect(g).connect(ctx.destination);const a=$("#ra").value/1000*cbuf.duration,e=$("#rb").value/1000*cbuf.duration;s.start(0,a,e-a)};
+const edv=()=>{const D=cbuf.duration;return{a:$("#ra").value/1000*D,e:$("#rb").value/1000*D,vol:$("#vo").value/100,fi:$("#fi").value/10,fo:$("#fo").value/10}};
+$("#pre").onclick=()=>{if(cbuf)go(cbuf,edv(),"pre")};
 $("#cx").onclick=()=>{if(mr?.state==="recording")mr.stop();dE.close()};
 $("#sv").onclick=async()=>{
-  if(!cb)return alert("Enregistre ou importe d’abord un son.");
-  const D=cbuf.duration,a=$("#ra").value/1000*D,e=$("#rb").value/1000*D;
-  Object.assign(ed,{name:$("#nm").value.trim()||"Son",emoji:$("#em").value||"🔊",cat:$("#ct").value,vol:$("#vo").value/100,blob:cb,a:a<.02?0:a,e:e>D-.02?0:e});
+  const D=cbuf?.duration||0,a=$("#ra").value/1000*D,e=$("#rb").value/1000*D;
+  Object.assign(ed,{name:$("#nm").value.trim()||"Son",emoji:$("#em").value||"🔊",cat:$("#ct").value,vol:$("#vo").value/100,fi:$("#fi").value/10,fo:$("#fo").value/10,blob:cb||null,a:a<.02?0:a,e:e>D-.02?0:e});
   if(ed.order==null)ed.order=Math.max(-1,...sounds.map(s=>s.order))+1;
   await put("sounds",ed);delete buf[ed.id];sounds=await all("sounds");dE.close();render();
 };
 $("#dl").onclick=async()=>{if(!confirm("Supprimer ce son ?"))return;await del("sounds",ed.id);sounds=await all("sounds");dE.close();render()};
 
+function wav(b,a,e){const sr=b.sampleRate,i0=Math.floor(a*sr),n=Math.floor(e*sr)-i0,ch=Math.min(b.numberOfChannels,2),o=new DataView(new ArrayBuffer(44+n*ch*2));
+  const w=(p,s)=>[...s].forEach((c,i)=>o.setUint8(p+i,c.charCodeAt(0)));
+  w(0,"RIFF");o.setUint32(4,36+n*ch*2,true);w(8,"WAVEfmt ");o.setUint32(16,16,true);o.setUint16(20,1,true);o.setUint16(22,ch,true);o.setUint32(24,sr,true);o.setUint32(28,sr*ch*2,true);o.setUint16(32,ch*2,true);o.setUint16(34,16,true);w(36,"data");o.setUint32(40,n*ch*2,true);
+  const d=[...Array(ch).keys()].map(c=>b.getChannelData(c));let p=44;
+  for(let i=0;i<n;i++)for(let c=0;c<ch;c++){o.setInt16(p,Math.max(-1,Math.min(1,d[c][i0+i]))*32767,true);p+=2}
+  return new Blob([o],{type:"audio/wav"})}
+$("#shr").onclick=async()=>{if(!cbuf)return alert("Pas de son à partager.");const o=edv(),f=new File([wav(cbuf,o.a,o.e)],($("#nm").value||"son")+".wav",{type:"audio/wav"});
+  try{if(navigator.canShare({files:[f]}))await navigator.share({files:[f],title:f.name});else alert("Partage non disponible sur cet appareil.")}catch{}};
+$("#mu").onclick=async()=>{S.mute=!S.mute;vol();await save();render()};
+$("#mv").oninput=()=>{S.vol=$("#mv").value/100;vol();save()};
+$("#vb").onchange=()=>{S.vib=$("#vb").checked;save()};
+
 /* réglages et sauvegardes */
 const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
 async function openSet(){
-  $("#mo").value=S.mode;$("#nc").value=S.cols;
+  $("#mo").value=S.mode;$("#nc").value=S.cols;$("#mv").value=S.vol*100;$("#vb").checked=S.vib;$("#xc").innerHTML="";S.cats.forEach(c=>$("#xc").add(new Option(c.name,c.id)));if(cur!=="all")$("#xc").value=cur;
   const e=await navigator.storage?.estimate?.();
   $("#inf").textContent=`${sounds.length} sons`+(e?` · ${(e.usage/1e6).toFixed(1)} Mo utilisés`:"")+(S.last?` · dernier export : ${new Date(S.last).toLocaleDateString("fr-FR")}`:" · aucun export");
   const sn=await get("snap","1");$("#rs").disabled=!sn;$("#sn").textContent=sn?`Sauvegarde interne (${new Date(sn.date).toLocaleDateString("fr-FR")})`:"Sauvegarde interne";
@@ -194,17 +215,18 @@ $("#st").onclick=openSet;$("#cl").onclick=()=>$("#dS").close();
 $("#mo").onchange=async e=>{S.mode=e.target.value;await save()};
 $("#nc").onchange=async e=>{S.cols=+e.target.value;await save();render()};
 $("#sa").onclick=()=>playing.slice().forEach(p=>p.src.stop());
-$("#ex").onclick=async()=>{
-  const out={v:1,cats:S.cats,sounds:await Promise.all(sounds.map(async s=>({...s,blob:await b64(s.blob)})))};
+async function exp(cid){
+  const ss=cid?sounds.filter(s=>s.cat===cid):sounds;const out={v:1,cats:cid?S.cats.filter(c=>c.id===cid):S.cats,sounds:await Promise.all(ss.map(async s=>({...s,blob:s.blob?await b64(s.blob):null})))};
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:"application/json"}));
-  a.download=`soundboard-${new Date().toISOString().slice(0,10)}.json`;a.click();S.last=Date.now();await save();render();openSet();
-};
+  a.download=`perroquet-${cid?S.cats.find(c=>c.id===cid).name+"-":""}${new Date().toISOString().slice(0,10)}.json`;a.click();if(!cid){S.last=Date.now();await save()}render();openSet();
+}
+$("#ex").onclick=()=>exp();$("#xp").onclick=()=>exp($("#xc").value);
 $("#im").onclick=()=>$("#jf").click();
 $("#jf").onchange=async e=>{
   const f=e.target.files[0];if(!f)return;
   try{const d=JSON.parse(await f.text());
     for(const c of d.cats)if(!S.cats.some(x=>x.id===c.id))S.cats.push(c);
-    for(const s of d.sounds){s.blob=await (await fetch(s.blob)).blob();await put("sounds",s)}
+    for(const s of d.sounds){s.blob=s.blob?await (await fetch(s.blob)).blob():null;await put("sounds",s)}
     await save();sounds=await all("sounds");buf={};render();alert(d.sounds.length+" sons importés.")}
   catch{alert("Fichier de sauvegarde invalide.")}e.target.value="";
 };

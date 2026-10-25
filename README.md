@@ -7,7 +7,7 @@ Une petite application web (PWA) de soundboard : chaque bouton rejoue un son que
 ## Fonctionnalités
 
 - Enregistrement au micro ou import d’un fichier audio (mp3, wav, m4a, ogg…)
-- Éditeur d’extrait : choix du début et de la fin sur la forme d’onde, avec écoute avant de valider
+- Éditeur d’extrait : choix du début et de la fin sur la forme d’onde, avec écoute avant de valider et bouton pour recommencer
 - Un emoji, un nom, un volume et une catégorie par bouton
 - Catégories colorées, avec onglets pour filtrer
 - Mode édition (✏️) : glisser-déposer pour réorganiser, toucher un bouton pour le modifier
@@ -46,7 +46,7 @@ Le projet est statique : il suffit de pousser les fichiers à la racine du dép�
 | `sw.js` | Service worker pour le mode hors ligne |
 | `icon-192.png`, `icon-512.png` | Icônes |
 
-Après une modification, change le numéro de version du cache dans `sw.js` (`sb-v6`, `sb-v7`…) pour que les appareils déjà installés récupèrent la mise à jour.
+Après une modification, change le numéro de version du cache dans `sw.js` (`sb-v7`, `sb-v8`…) pour que les appareils déjà installés récupèrent la mise à jour.
 
 ## Technique
 

@@ -45,8 +45,8 @@ canvas{width:100%;height:80px;background:var(--soft);border-radius:12px;display:
 input[type=range]{width:100%;accent-color:var(--c4)}
 .em{font-size:1.5rem;background:var(--soft);border:0;border-radius:10px;width:42px;height:42px}
 section a{color:var(--c3)}
-#dS{margin:auto auto 0;width:min(100%,680px);max-width:100%;border-radius:20px 20px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));max-height:80vh}
-#dS[open]{animation:up .3s cubic-bezier(.4,0,.2,1)}@keyframes up{from{transform:translateY(100%)}}
+#dS,#dE{margin:auto auto 0;width:min(100%,680px);max-width:100%;border-radius:20px 20px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));max-height:80vh}
+#dS[open],#dE[open]{animation:up .3s cubic-bezier(.4,0,.2,1)}@keyframes up{from{transform:translateY(100%)}}
 .handle{width:40px;height:4px;border-radius:2px;background:var(--bd);margin:0 auto 16px}
 .phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;font-size:1.1rem;font-weight:700}
 .pclose{width:30px;height:30px;border-radius:50%;border:0;background:var(--soft);font-size:16px}
@@ -67,17 +67,17 @@ small{opacity:.7;display:block;margin-top:6px}
 <header><h1>🦜 Perroquitos</h1><div><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
 <div id="ban" hidden></div><nav id="tabs"></nav><main id="grid"></main><button id="ed" title="Modifier">✏️</button><button id="sh" title="Partager des sons">📤</button><button id="go" title="Partager la sélection" hidden>✔️</button><button id="add" aria-label="Ajouter un son">＋</button>
 
-<dialog id="dE"><h2 id="eT">Nouveau son</h2>
-<div class="row"><button class="btn r" id="rec">● Enregistrer</button><button class="btn g" id="imp">📁 Importer</button><input type="file" id="file" accept="audio/*" hidden></div>
-<canvas id="wv" width="400" height="80"></canvas>
-<label>Début</label><input type="range" id="ra" min="0" max="1000" value="0">
-<label>Fin</label><input type="range" id="rb" min="0" max="1000" value="1000">
-<div class="row"><button class="btn v" id="pre">▶ Écouter l’extrait</button><span id="dur"></span></div>
-<label>Nom</label><input type="text" id="nm" maxlength="30">
-<label>Emoji</label><div class="row" style="align-items:center"><input type="text" id="em" maxlength="4" style="width:70px;font-size:1.5rem;text-align:center"><span id="ems"></span></div>
-<label>Catégorie</label><select id="ct"></select>
-<label>Volume</label><input type="range" id="vo" min="10" max="100" value="100"><label>Fondu d’entrée</label><input type="range" id="fi" min="0" max="20" value="0"><label>Fondu de sortie</label><input type="range" id="fo" min="0" max="20" value="0">
-<div class="row"><button class="btn" id="sv">Enregistrer</button><button class="btn g" id="cx">Annuler</button><button class="btn g" id="shr">📤 Partager</button><button class="btn r" id="dl" hidden>Supprimer</button></div></dialog>
+<dialog id="dE"><div class="handle"></div>
+<div class="phead"><span id="eT">Nouveau son</span><button id="cx" class="pclose" aria-label="Fermer">✕</button></div>
+<div class="prow"><div class="plab">Son</div><div class="popts"><button class="btn r" id="rec">● Enregistrer</button><button class="btn g" id="imp">📁 Importer</button><button class="btn g" id="rst" hidden>↺ Recommencer</button></div><input type="file" id="file" accept="audio/*" hidden></div>
+<div class="prow"><div class="plab">Extrait</div><canvas id="wv" width="400" height="80"></canvas>
+<div class="hint">Début</div><input type="range" id="ra" min="0" max="1000" value="0"><div class="hint">Fin</div><input type="range" id="rb" min="0" max="1000" value="1000">
+<div class="popts" style="margin-top:10px;align-items:center"><button class="btn v" id="pre">▶ Écouter l’extrait</button><span id="dur"></span></div></div>
+<div class="prow"><div class="plab">Nom</div><input type="text" id="nm" maxlength="30"></div>
+<div class="prow"><div class="plab">Emoji</div><div class="popts" style="align-items:center"><input type="text" id="em" maxlength="4" style="width:70px;font-size:1.5rem;text-align:center"><span id="ems"></span></div></div>
+<div class="prow"><div class="plab">Catégorie</div><select id="ct" class="pill"></select></div>
+<div class="prow"><div class="plab">Volume et fondus</div><div class="hint">Volume</div><input type="range" id="vo" min="10" max="100" value="100"><div class="hint">Fondu d’entrée</div><input type="range" id="fi" min="0" max="20" value="0"><div class="hint">Fondu de sortie</div><input type="range" id="fo" min="0" max="20" value="0"></div>
+<div class="popts"><button class="btn" id="sv" style="flex:1">Enregistrer</button><button class="btn g" id="shr">📤 Partager</button><button class="btn r" id="dl" hidden>Supprimer</button></div></dialog>
 
 <dialog id="dS"><div class="handle"></div>
 <div class="phead"><span>⚙️ Réglages</span><button id="cl" class="pclose" aria-label="Fermer">✕</button></div>
@@ -97,7 +97,7 @@ small{opacity:.7;display:block;margin-top:6px}
 <div class="prow"><div class="plab">Une seule catégorie</div><div class="popts"><select id="xc" style="flex:1"></select><button class="btn" id="xp">Exporter</button></div></div>
 <div class="prow"><div class="plab">Sauvegarde interne</div><div class="popts"><button class="btn v" id="sn">Sauvegarder</button><button class="btn g" id="rs">Restaurer</button></div>
 <div class="hint" id="inf"></div><div class="hint">La sauvegarde interne garde une seule version (elle remplace la précédente) mais reste dans le navigateur : exporte aussi un fichier .json régulièrement et garde-le hors du téléphone. L’import fusionne avec les sons existants.</div></div></section>
-<section data-t="inf"><div class="pline"><span>Application</span><b>🦜 Perroquitos</b></div><div class="pline"><span>Version</span><b>1.2</b></div><div class="pline"><span>Code source</span><a href="https://github.com/a-rech/monperroquet" target="_blank" rel="noopener">GitHub</a></div>
+<section data-t="inf"><div class="pline"><span>Application</span><b>🦜 Perroquitos</b></div><div class="pline"><span>Version</span><b>1.3</b></div><div class="pline"><span>Code source</span><a href="https://github.com/a-rech/monperroquet" target="_blank" rel="noopener">GitHub</a></div>
 <div class="prow" style="margin-top:18px"><button class="btn" id="up">↻ Mettre à jour l’appli</button><div class="hint">Recharge la dernière version depuis internet. Tes sons ne sont pas touchés.</div></div></section></dialog>
 
 <script>
@@ -186,10 +186,10 @@ async function editCat(){
 /* éditeur */
 let ed=null,cb=null,cbuf=null,mr,chunks=[];
 const dE=$("#dE");
-function fillCats(v){$("#ct").innerHTML="";S.cats.forEach(c=>$("#ct").add(new Option(c.name,c.id)));$("#ct").value=v}
+function fillCats(v){const s=$("#ct");if(s.nextElementSibling?.classList.contains("popts"))s.nextElementSibling.remove();s.innerHTML="";S.cats.forEach(c=>s.add(new Option(c.name,c.id)));s.value=v;pills()}
 $("#ems").innerHTML=EMO.map(e=>`<button class="em" type="button">${e}</button>`).join("");
 $("#ems").onclick=e=>{if(e.target.classList.contains("em"))$("#em").value=e.target.textContent};
-async function setBlob(b){cb=b;cbuf=await decode(b);$("#ra").value=ed.a?ed.a/cbuf.duration*1000:0;$("#rb").value=ed.e?ed.e/cbuf.duration*1000:1000;draw()}
+async function setBlob(b){$("#rst").hidden=false;cb=b;cbuf=await decode(b);$("#ra").value=ed.a?ed.a/cbuf.duration*1000:0;$("#rb").value=ed.e?ed.e/cbuf.duration*1000:1000;draw()}
 function draw(){
   const c=$("#wv"),x=c.getContext("2d"),W=c.width,H=c.height;x.clearRect(0,0,W,H);if(!cbuf)return;
   const d=cbuf.getChannelData(0),step=Math.floor(d.length/W)||1,a=$("#ra").value/1000*W,e=$("#rb").value/1000*W;
@@ -200,7 +200,7 @@ function draw(){
 $("#ra").oninput=()=>{if(+$("#ra").value>+$("#rb").value-5)$("#ra").value=$("#rb").value-5;draw()};
 $("#rb").oninput=()=>{if(+$("#rb").value<+$("#ra").value+5)$("#rb").value=+$("#ra").value+5;draw()};
 function openEd(s){
-  ed=s?{...s}:{id:uid(),a:0,e:0};cb=cbuf=null;
+  ed=s?{...s}:{id:uid(),a:0,e:0};cb=cbuf=null;$("#rst").hidden=true;
   $("#eT").textContent=s?"Modifier le son":"Nouveau son";
   $("#nm").value=s?.name||"";$("#em").value=s?.emoji||"🔔";$("#vo").value=(s?.vol??1)*100;$("#fi").value=(s?.fi||0)*10;$("#fo").value=(s?.fo||0)*10;$("#shr").hidden=!navigator.canShare;
   fillCats(s?.cat||(cur!=="all"?cur:S.cats[0].id));$("#dl").hidden=!s;
@@ -211,7 +211,7 @@ $("#add").onclick=()=>openEd();
 $("#ed").onclick=()=>{edit=!edit;sel=false;picked.clear();render()};
 $("#sh").onclick=()=>{sel=!sel;edit=false;picked.clear();render()};
 $("#imp").onclick=()=>$("#file").click();
-$("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await setBlob(f);if(!$("#nm").value)$("#nm").value=f.name.replace(/\.[^.]+$/,"").slice(0,30)}catch{alert("Format audio non lisible.")}e.target.value=""};
+$("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await setBlob(f);if(!$("#nm").value)$("#nm").value=f.name.replace(/\.[^.]+$/,"").slice(0,30)}catch{cb=cbuf=null;$("#rst").hidden=true;alert("Format audio non lisible.")}e.target.value=""};
 $("#rec").onclick=async()=>{
   if(mr?.state==="recording"){mr.stop();return}
   try{const st=await navigator.mediaDevices.getUserMedia({audio:true});mr=new MediaRecorder(st);chunks=[];
@@ -220,6 +220,7 @@ $("#rec").onclick=async()=>{
     mr.start();$("#rec").textContent="■ Arrêter"}catch{alert("Micro non autorisé.")}
 };
 const edv=()=>{const D=cbuf.duration;return{a:$("#ra").value/1000*D,e:$("#rb").value/1000*D,vol:$("#vo").value/100,fi:$("#fi").value/10,fo:$("#fo").value/10}};
+$("#rst").onclick=()=>{cb=cbuf=null;ed.a=ed.e=0;$("#ra").value=0;$("#rb").value=1000;$("#dur").textContent="";$("#rst").hidden=true;draw()};
 $("#pre").onclick=()=>{if(cbuf)go(cbuf,edv(),"pre")};
 $("#cx").onclick=()=>{if(mr?.state==="recording")mr.stop();dE.close()};
 $("#sv").onclick=async()=>{

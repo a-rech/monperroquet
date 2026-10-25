@@ -2,7 +2,7 @@
 <html lang="fr"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#9b6bff"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png">
-<title>Mon Perroquet</title>
+<title>Perroquitos</title>
 <style>
 :root{--bg:#f4f1ff;--ink:#2a2340;--c0:#ff6b6b;--c1:#ffb020;--c2:#2ec4a0;--c3:#3d8bfd;--c4:#9b6bff;--c5:#ff7eb6;color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -18,12 +18,14 @@ nav{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px}
 #grid{display:grid;gap:12px;padding:0 16px;grid-template-columns:repeat(var(--n,3),1fr)}
 .tile{aspect-ratio:1;border:0;border-radius:22px;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:6px;box-shadow:0 5px 0 rgba(0,0,0,.18);user-select:none}
 .tile:active,.tile.hit{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.18)}
-.tile b{font-size:2.4rem;font-weight:400;line-height:1}
-.tile span{font-size:.8rem;font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tile b{font-size:var(--e,2.4rem);font-weight:400;line-height:1}
+.tile span{font-size:var(--t,.8rem);font-weight:700;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tile.vide{opacity:.55}
 .edit .tile{touch-action:none;outline:3px dashed rgba(255,255,255,.8);outline-offset:-8px}
 .tile.drag{z-index:5;opacity:.8;position:relative}
 #add{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:64px;height:64px;border:0;border-radius:50%;background:var(--c0);color:#fff;font-size:2rem;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+#ed{position:fixed;left:18px;bottom:calc(26px + env(safe-area-inset-bottom));width:48px;height:48px;border:0;border-radius:50%;background:#fff;font-size:1.3rem;box-shadow:0 4px 0 #d9d2f5}
+#ed.on{background:var(--c1)}
 #ban{margin:0 16px 12px;padding:10px 14px;background:var(--c1);border-radius:14px;font-weight:700}
 .empty{grid-column:1/-1;text-align:center;padding:40px 10px;opacity:.7}
 dialog{border:0;border-radius:24px;width:min(92vw,440px);padding:18px;color:var(--ink)}
@@ -39,8 +41,8 @@ input[type=range]{width:100%;accent-color:var(--c4)}
 .em{font-size:1.5rem;background:#f4f1ff;border:0;border-radius:10px;width:42px;height:42px}
 small{opacity:.7;display:block;margin-top:6px}
 </style></head><body>
-<header><h1>🦜 Mon Perroquet</h1><div><button class="ib" id="mu" title="Muet">🔊</button><button class="ib" id="ed" title="Modifier">✏️</button><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
-<div id="ban" hidden></div><nav id="tabs"></nav><main id="grid"></main><button id="add" aria-label="Ajouter un son">＋</button>
+<header><h1>🦜 Perroquitos</h1><div><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
+<div id="ban" hidden></div><nav id="tabs"></nav><main id="grid"></main><button id="ed" title="Modifier">✏️</button><button id="add" aria-label="Ajouter un son">＋</button>
 
 <dialog id="dE"><h2 id="eT">Nouveau son</h2>
 <div class="row"><button class="btn r" id="rec">● Enregistrer</button><button class="btn g" id="imp">📁 Importer</button><input type="file" id="file" accept="audio/*" hidden></div>
@@ -68,6 +70,8 @@ small{opacity:.7;display:block;margin-top:6px}
 <script>
 const $=s=>document.querySelector(s);
 const COL=["#ff6b6b","#ffb020","#2ec4a0","#3d8bfd","#9b6bff","#ff7eb6"];
+// Tailles par nombre de colonnes : [taille emoji en rem, taille du nom en rem]
+const TAILLE={2:[3.6,.95],3:[2.4,.8],4:[1.8,.7],5:[1.4,.62]};
 const EMO="🔔🎺🥁👏😂😱🐶🐱🚗💥🎉🎸🔥👍❓".match(/./gu);
 let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0,vol:1,mute:false,vib:true},sounds=[],cur="all",edit=false,buf={},ctx,playing=[];
 const open=()=>new Promise((r,j)=>{const q=indexedDB.open("sb",1);q.onupgradeneeded=()=>["sounds","kv","snap"].forEach(n=>q.result.createObjectStore(n,{keyPath:"id"}));q.onsuccess=()=>r(q.result);q.onerror=j});
@@ -75,7 +79,7 @@ const tx=(s,m,f)=>new Promise((r,j)=>{const t=db.transaction(s,m),o=f(t.objectSt
 const put=(s,v)=>tx(s,"readwrite",o=>o.put(v)),del=(s,k)=>tx(s,"readwrite",o=>o.delete(k)),all=s=>tx(s,"readonly",o=>o.getAll()),get=(s,k)=>tx(s,"readonly",o=>o.get(k));
 const save=()=>put("kv",S);
 const uid=()=>crypto.randomUUID();
-let mg;const vol=()=>{if(mg)mg.gain.value=S.mute?0:S.vol};
+let mg;const vol=()=>{if(mg)mg.gain.value=S.vol};
 const ac=()=>{if(!ctx){ctx=new AudioContext();mg=ctx.createGain();mg.connect(ctx.destination);vol()}ctx.resume();return ctx};
 const decode=async b=>ac().decodeAudioData(await b.arrayBuffer());
 const bufOf=async s=>buf[s.id]||(buf[s.id]=await decode(s.blob));
@@ -105,7 +109,7 @@ function render(){
     const a=document.createElement("button");a.className="chip";a.textContent="＋ Catégorie";a.onclick=newCat;t.append(a);
     if(cur!=="all"){const m=document.createElement("button");m.className="chip";m.textContent="✎ Modifier";m.onclick=editCat;t.append(m)}
   }
-  const g=$("#grid");g.textContent="";g.className=edit?"edit":"";g.style.setProperty("--n",S.cols);
+  const g=$("#grid");g.textContent="";g.className=edit?"edit":"";g.style.setProperty("--n",S.cols);const z=TAILLE[S.cols]||TAILLE[3];g.style.setProperty("--e",z[0]+"rem");g.style.setProperty("--t",z[1]+"rem");
   const list=sounds.filter(s=>cur==="all"||s.cat===cur).sort((a,b)=>a.order-b.order);
   if(!list.length){g.innerHTML='<p class="empty">Aucun son ici.<br>Touche ＋ pour enregistrer ou importer.</p>'}
   list.forEach(s=>{
@@ -114,7 +118,7 @@ function render(){
     b.innerHTML="<b></b><span></span>";b.firstChild.textContent=s.emoji||"🔊";b.lastChild.textContent=s.name||"";
     b.onclick=()=>{if(!edit)play(s,b)};drag(b,s);g.append(b);
   });
-  $("#ed").classList.toggle("on",edit);$("#mu").textContent=S.mute?"🔇":"🔊";
+  $("#ed").classList.toggle("on",edit);
   const old=sounds.length&&Date.now()-S.last>14*864e5;
   $("#ban").hidden=!old;$("#ban").textContent="💾 Pense à faire une sauvegarde (réglages ⚙️)";
 }
@@ -198,7 +202,6 @@ function wav(b,a,e){const sr=b.sampleRate,i0=Math.floor(a*sr),n=Math.floor(e*sr)
   return new Blob([o],{type:"audio/wav"})}
 $("#shr").onclick=async()=>{if(!cbuf)return alert("Pas de son à partager.");const o=edv(),f=new File([wav(cbuf,o.a,o.e)],($("#nm").value||"son")+".wav",{type:"audio/wav"});
   try{if(navigator.canShare({files:[f]}))await navigator.share({files:[f],title:f.name});else alert("Partage non disponible sur cet appareil.")}catch{}};
-$("#mu").onclick=async()=>{S.mute=!S.mute;vol();await save();render()};
 $("#mv").oninput=()=>{S.vol=$("#mv").value/100;vol();save()};
 $("#vb").onchange=()=>{S.vib=$("#vb").checked;save()};
 
@@ -218,7 +221,7 @@ $("#sa").onclick=()=>playing.slice().forEach(p=>p.src.stop());
 async function exp(cid){
   const ss=cid?sounds.filter(s=>s.cat===cid):sounds;const out={v:1,cats:cid?S.cats.filter(c=>c.id===cid):S.cats,sounds:await Promise.all(ss.map(async s=>({...s,blob:s.blob?await b64(s.blob):null})))};
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(out)],{type:"application/json"}));
-  a.download=`perroquet-${cid?S.cats.find(c=>c.id===cid).name+"-":""}${new Date().toISOString().slice(0,10)}.json`;a.click();if(!cid){S.last=Date.now();await save()}render();openSet();
+  a.download=`perroquitos-${cid?S.cats.find(c=>c.id===cid).name+"-":""}${new Date().toISOString().slice(0,10)}.json`;a.click();if(!cid){S.last=Date.now();await save()}render();openSet();
 }
 $("#ex").onclick=()=>exp();$("#xp").onclick=()=>exp($("#xc").value);
 $("#im").onclick=()=>$("#jf").click();

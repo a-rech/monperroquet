@@ -1,4 +1,4 @@
-# 🦜 Mon Perroquet
+# 🦜 Perroquitos
 
 Une petite application web (PWA) de soundboard : chaque bouton rejoue un son que tu as enregistré ou importé, avec un emoji pour le reconnaître. Tout est stocké sur ton téléphone, sans compte ni serveur.
 
@@ -13,7 +13,7 @@ Une petite application web (PWA) de soundboard : chaque bouton rejoue un son que
 - Mode édition (✏️) : glisser-déposer pour réorganiser, toucher un bouton pour le modifier
 - Comportement quand on touche un bouton déjà en lecture, au choix : rejouer, arrêter ou superposer
 - Nombre de colonnes réglable
-- Volume général, bouton muet, fondus d’entrée et de sortie par son, vibration au toucher
+- Volume général, fondus d’entrée et de sortie par son, vibration au toucher
 - Boutons sans son : un appui propose d’en ajouter un
 - Partage d’un extrait vers une autre appli Android (fichier .wav)
 - Fonctionne hors ligne une fois installée
@@ -44,7 +44,7 @@ Le projet est statique : il suffit de pousser les fichiers à la racine du dép�
 | `sw.js` | Service worker pour le mode hors ligne |
 | `icon-192.png`, `icon-512.png` | Icônes |
 
-Après une modification, change le numéro de version du cache dans `sw.js` (`sb-v3`, `sb-v4`…) pour que les appareils déjà installés récupèrent la mise à jour.
+Après une modification, change le numéro de version du cache dans `sw.js` (`sb-v4`, `sb-v5`…) pour que les appareils déjà installés récupèrent la mise à jour.
 
 ## Technique
 

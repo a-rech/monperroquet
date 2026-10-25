@@ -26,8 +26,11 @@ nav{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 12px}
 .edit .tile{touch-action:none;outline:3px dashed rgba(255,255,255,.8);outline-offset:-8px}
 .tile.drag{z-index:5;opacity:.8;position:relative}
 #add{position:fixed;right:18px;bottom:calc(18px + env(safe-area-inset-bottom));width:64px;height:64px;border:0;border-radius:50%;background:var(--c0);color:#fff;font-size:2rem;box-shadow:0 5px 0 rgba(0,0,0,.2)}
-#ed{position:fixed;left:18px;bottom:calc(26px + env(safe-area-inset-bottom));width:48px;height:48px;border:0;border-radius:50%;background:var(--card);font-size:1.3rem;box-shadow:0 4px 0 #d9d2f5}
-#ed.on{background:var(--c1)}
+#ed,#sh,#go{position:fixed;bottom:calc(26px + env(safe-area-inset-bottom));width:48px;height:48px;border:0;border-radius:50%;background:var(--card);font-size:1.3rem;box-shadow:0 4px 0 #d9d2f5}
+#ed{left:18px}#sh{left:76px}#go{left:134px;background:var(--c2)}
+#ed.on,#sh.on{background:var(--c1)}
+.tile{position:relative}.tile.pick{outline:4px solid var(--ink);outline-offset:-4px}
+.tile.pick::after{content:"✔";position:absolute;top:6px;right:8px;background:var(--ink);color:var(--bg);border-radius:50%;width:22px;height:22px;font-size:13px;display:flex;align-items:center;justify-content:center}
 #ban{margin:0 16px 12px;padding:10px 14px;background:var(--c1);border-radius:14px;font-weight:700}
 .empty{grid-column:1/-1;text-align:center;padding:40px 10px;opacity:.7}
 dialog{background:var(--card);max-height:88vh;border:0;border-radius:24px;width:min(92vw,440px);padding:18px;color:var(--ink)}
@@ -42,10 +45,27 @@ canvas{width:100%;height:80px;background:var(--soft);border-radius:12px;display:
 input[type=range]{width:100%;accent-color:var(--c4)}
 .em{font-size:1.5rem;background:var(--soft);border:0;border-radius:10px;width:42px;height:42px}
 section a{color:var(--c3)}
+#dS{margin:auto auto 0;width:min(100%,680px);max-width:100%;border-radius:20px 20px 0 0;padding:20px 20px calc(28px + env(safe-area-inset-bottom));max-height:80vh}
+#dS[open]{animation:up .3s cubic-bezier(.4,0,.2,1)}@keyframes up{from{transform:translateY(100%)}}
+.handle{width:40px;height:4px;border-radius:2px;background:var(--bd);margin:0 auto 16px}
+.phead{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;font-size:1.1rem;font-weight:700}
+.pclose{width:30px;height:30px;border-radius:50%;border:0;background:var(--soft);font-size:16px}
+.ptabs{display:flex;gap:6px;overflow-x:auto;margin-bottom:22px;scrollbar-width:none}.ptabs::-webkit-scrollbar{display:none}
+.ptab{flex:none;padding:8px 14px;border-radius:10px;border:1px solid var(--bd);background:var(--card);font-size:13px;font-weight:600;opacity:.8}
+.ptab.on{background:var(--c4);border-color:var(--c4);color:#fff;opacity:1}
+.prow{margin-bottom:22px}.plab{font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.6;font-weight:700;margin-bottom:10px}
+.popts{display:flex;gap:8px;flex-wrap:wrap}.popt{flex:1;min-width:60px;padding:9px 8px;border-radius:10px;border:1px solid var(--bd);background:var(--soft);font-size:13px;text-align:center}
+.popt.on{background:var(--c4);border-color:var(--c4);color:#fff}
+.trow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.tl{font-size:14px}
+input.sw{appearance:none;-webkit-appearance:none;width:44px;height:26px;border-radius:13px;background:var(--bd);position:relative;flex:none;margin:0;border:0}
+input.sw::after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:left .2s}
+input.sw:checked{background:var(--c4)}input.sw:checked::after{left:21px}
+.pline{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--bd);font-size:14px}.pline span:first-child{opacity:.6;font-size:12px;text-transform:uppercase;letter-spacing:.05em}
+.hint{font-size:12px;opacity:.65;line-height:1.5;margin-top:8px}
 small{opacity:.7;display:block;margin-top:6px}
 </style></head><body>
 <header><h1>🦜 Perroquitos</h1><div><button class="ib" id="st" title="Réglages">⚙️</button></div></header>
-<div id="ban" hidden></div><nav id="tabs"></nav><main id="grid"></main><button id="ed" title="Modifier">✏️</button><button id="add" aria-label="Ajouter un son">＋</button>
+<div id="ban" hidden></div><nav id="tabs"></nav><main id="grid"></main><button id="ed" title="Modifier">✏️</button><button id="sh" title="Partager des sons">📤</button><button id="go" title="Partager la sélection" hidden>✔️</button><button id="add" aria-label="Ajouter un son">＋</button>
 
 <dialog id="dE"><h2 id="eT">Nouveau son</h2>
 <div class="row"><button class="btn r" id="rec">● Enregistrer</button><button class="btn g" id="imp">📁 Importer</button><input type="file" id="file" accept="audio/*" hidden></div>
@@ -59,27 +79,26 @@ small{opacity:.7;display:block;margin-top:6px}
 <label>Volume</label><input type="range" id="vo" min="10" max="100" value="100"><label>Fondu d’entrée</label><input type="range" id="fi" min="0" max="20" value="0"><label>Fondu de sortie</label><input type="range" id="fo" min="0" max="20" value="0">
 <div class="row"><button class="btn" id="sv">Enregistrer</button><button class="btn g" id="cx">Annuler</button><button class="btn g" id="shr">📤 Partager</button><button class="btn r" id="dl" hidden>Supprimer</button></div></dialog>
 
-<dialog id="dS"><h2>Réglages</h2>
-<div id="stabs" class="row" style="margin:0 0 6px"><button class="chip" data-t="son">🔊 Son</button><button class="chip" data-t="aff">🎨 Affichage</button><button class="chip" data-t="int">✋ Interaction</button><button class="chip" data-t="sav">💾 Sauvegardes</button><button class="chip" data-t="inf">ℹ️ À propos</button></div>
-<section data-t="son"><label>Quand on touche un bouton déjà en lecture</label>
-<select id="mo"><option value="restart">Rejouer depuis le début</option><option value="stop">Arrêter le son</option><option value="overlap">Superposer</option></select>
-<label>Sons simultanés (maximum)</label><select id="mx"><option value="0">Illimité</option><option>1</option><option>2</option><option>3</option><option>5</option><option>8</option></select>
-<label>Volume général</label><input type="range" id="mv" min="0" max="100"><small>Le volume média d’Android reste prioritaire : si tu n’entends rien, monte-le avec les touches de volume du téléphone (le mode sonnerie silencieux ne coupe pas les médias).</small>
-<div class="row"><button class="btn g" id="sa">⏹ Tout arrêter</button></div></section>
-<section data-t="aff"><label>Thème</label><select id="th"><option value="auto">Automatique (comme le téléphone)</option><option value="light">Clair</option><option value="dark">Sombre</option></select>
-<label>Palette des catégories</label><select id="pl"><option value="vif">Vif</option><option value="pastel">Pastel</option><option value="ocean">Océan</option><option value="foret">Forêt</option><option value="sunset">Coucher de soleil</option></select>
-<label>Colonnes</label><select id="nc"><option>2</option><option>3</option><option>4</option><option>5</option></select></section>
-<section data-t="int"><label><input type="checkbox" id="vb"> Vibration au toucher</label>
-<label><input type="checkbox" id="wk"> Garder l’écran allumé</label>
-<label><input type="checkbox" id="cf"> Confirmer avant de supprimer</label></section>
-<section data-t="sav"><div class="row"><button class="btn" id="ex">Exporter (.json)</button><button class="btn g" id="im">Importer</button><input type="file" id="jf" accept=".json,application/json" hidden></div>
-<div class="row"><select id="xc" style="flex:1"></select><button class="btn" id="xp">Exporter la catégorie</button></div>
-<div class="row"><button class="btn v" id="sn">Sauvegarde interne</button><button class="btn g" id="rs">Restaurer</button></div>
-<small id="inf"></small>
-<small>La sauvegarde interne garde une seule version (elle remplace la précédente) mais reste dans le navigateur : exporte aussi un fichier .json régulièrement et garde-le hors du téléphone. L’import fusionne avec les sons existants.</small></section>
-<section data-t="inf"><p>🦜 <b>Perroquitos</b> · version 1.1</p><p><a href="https://github.com/a-rech/monperroquet" target="_blank" rel="noopener">Code source sur GitHub</a></p>
-<div class="row"><button class="btn" id="up">↻ Mettre à jour l’appli</button></div><small>Recharge la dernière version depuis internet. Tes sons ne sont pas touchés.</small></section>
-<div class="row"><button class="btn g" id="cl">Fermer</button></div></dialog>
+<dialog id="dS"><div class="handle"></div>
+<div class="phead"><span>⚙️ Réglages</span><button id="cl" class="pclose" aria-label="Fermer">✕</button></div>
+<div id="stabs" class="ptabs"><button class="ptab" data-t="son">🔊 Son</button><button class="ptab" data-t="aff">🎨 Affichage</button><button class="ptab" data-t="int">✋ Interaction</button><button class="ptab" data-t="sav">💾 Sauvegardes</button><button class="ptab" data-t="inf">ℹ️ À propos</button></div>
+<section data-t="son"><div class="prow"><div class="plab">Bouton déjà en lecture</div>
+<select id="mo" class="pill"><option value="restart">Rejouer</option><option value="stop">Arrêter</option><option value="overlap">Superposer</option></select></div>
+<div class="prow"><div class="plab">Sons simultanés (maximum)</div><select id="mx" class="pill"><option value="0">Illimité</option><option>1</option><option>2</option><option>3</option><option>5</option><option>8</option></select></div>
+<div class="prow"><div class="plab">Volume général</div><input type="range" id="mv" min="0" max="100"><div class="hint">Le volume média d’Android reste prioritaire : si tu n’entends rien, monte-le avec les touches de volume du téléphone (le mode sonnerie silencieux ne coupe pas les médias).</div></div>
+<div class="prow"><button class="btn g" id="sa">⏹ Tout arrêter</button></div></section>
+<section data-t="aff"><div class="prow"><div class="plab">Thème</div><select id="th" class="pill"><option value="auto">🌓 Auto</option><option value="light">☀️ Clair</option><option value="dark">🌙 Sombre</option></select></div>
+<div class="prow"><div class="plab">Palette des catégories</div><select id="pl" class="pill"><option value="vif">Vif</option><option value="pastel">Pastel</option><option value="ocean">Océan</option><option value="foret">Forêt</option><option value="sunset">Coucher de soleil</option></select></div>
+<div class="prow"><div class="plab">Colonnes</div><select id="nc" class="pill"><option>2</option><option>3</option><option>4</option><option>5</option></select></div></section>
+<section data-t="int"><div class="trow"><div><div class="tl">Vibration au toucher</div></div><input type="checkbox" class="sw" id="vb"></div>
+<div class="trow"><div><div class="tl">Garder l’écran allumé</div><div class="hint">Évite la mise en veille pendant l’utilisation</div></div><input type="checkbox" class="sw" id="wk"></div>
+<div class="trow"><div><div class="tl">Confirmer avant de supprimer</div><div class="hint">Sons et catégories</div></div><input type="checkbox" class="sw" id="cf"></div></section>
+<section data-t="sav"><div class="prow"><div class="plab">Fichier de sauvegarde</div><div class="popts"><button class="btn" id="ex">Exporter (.json)</button><button class="btn g" id="im">Importer</button></div><input type="file" id="jf" accept=".json,application/json" hidden></div>
+<div class="prow"><div class="plab">Une seule catégorie</div><div class="popts"><select id="xc" style="flex:1"></select><button class="btn" id="xp">Exporter</button></div></div>
+<div class="prow"><div class="plab">Sauvegarde interne</div><div class="popts"><button class="btn v" id="sn">Sauvegarder</button><button class="btn g" id="rs">Restaurer</button></div>
+<div class="hint" id="inf"></div><div class="hint">La sauvegarde interne garde une seule version (elle remplace la précédente) mais reste dans le navigateur : exporte aussi un fichier .json régulièrement et garde-le hors du téléphone. L’import fusionne avec les sons existants.</div></div></section>
+<section data-t="inf"><div class="pline"><span>Application</span><b>🦜 Perroquitos</b></div><div class="pline"><span>Version</span><b>1.2</b></div><div class="pline"><span>Code source</span><a href="https://github.com/a-rech/monperroquet" target="_blank" rel="noopener">GitHub</a></div>
+<div class="prow" style="margin-top:18px"><button class="btn" id="up">↻ Mettre à jour l’appli</button><div class="hint">Recharge la dernière version depuis internet. Tes sons ne sont pas touchés.</div></div></section></dialog>
 
 <script>
 const $=s=>document.querySelector(s);
@@ -88,7 +107,7 @@ let COL=PALS.vif;
 // Tailles par nombre de colonnes : [taille emoji en rem, taille du nom en rem]
 const TAILLE={2:[3.6,.95],3:[2.4,.8],4:[1.8,.7],5:[1.4,.62]};
 const EMO="🔔🎺🥁👏😂😱🐶🐱🚗💥🎉🎸🔥👍❓".match(/./gu);
-let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0,vol:1,vib:true,theme:"auto",pal:"vif",max:0,wake:false,conf:true},sounds=[],cur="all",edit=false,buf={},ctx,playing=[];
+let db,S={id:"state",cats:[{id:"c1",name:"Favoris",col:0}],mode:"restart",cols:3,last:0,vol:1,vib:true,theme:"auto",pal:"vif",max:0,wake:false,conf:true},sounds=[],cur="all",edit=false,sel=false,picked=new Set(),buf={},ctx,playing=[];
 const open=()=>new Promise((r,j)=>{const q=indexedDB.open("sb",1);q.onupgradeneeded=()=>["sounds","kv","snap"].forEach(n=>q.result.createObjectStore(n,{keyPath:"id"}));q.onsuccess=()=>r(q.result);q.onerror=j});
 const tx=(s,m,f)=>new Promise((r,j)=>{const t=db.transaction(s,m),o=f(t.objectStore(s));t.oncomplete=()=>r(o.result);t.onerror=j});
 const put=(s,v)=>tx(s,"readwrite",o=>o.put(v)),del=(s,k)=>tx(s,"readwrite",o=>o.delete(k)),all=s=>tx(s,"readonly",o=>o.getAll()),get=(s,k)=>tx(s,"readonly",o=>o.get(k));
@@ -130,11 +149,11 @@ function render(){
   if(!list.length){g.innerHTML='<p class="empty">Aucun son ici.<br>Touche ＋ pour enregistrer ou importer.</p>'}
   list.forEach(s=>{
     const c=S.cats.find(c=>c.id===s.cat),b=document.createElement("button");
-    b.className="tile"+(s.blob?"":" vide");b.dataset.id=s.id;b.style.background=COL[c?c.col:4];
+    b.className="tile"+(s.blob?"":" vide")+(picked.has(s.id)?" pick":"");b.dataset.id=s.id;b.style.background=COL[c?c.col:4];
     b.innerHTML="<b></b><span></span>";b.firstChild.textContent=s.emoji||"🔊";b.lastChild.textContent=s.name||"";
-    b.onclick=()=>{if(!edit)play(s,b)};drag(b,s);g.append(b);
+    b.onclick=()=>{if(sel){if(!s.blob)return;picked.has(s.id)?picked.delete(s.id):picked.add(s.id);render()}else if(!edit)play(s,b)};drag(b,s);g.append(b);
   });
-  $("#ed").classList.toggle("on",edit);
+  $("#ed").classList.toggle("on",edit);$("#sh").classList.toggle("on",sel);$("#go").hidden=!picked.size;
   const old=sounds.length&&Date.now()-S.last>14*864e5;
   $("#ban").hidden=!old;$("#ban").textContent="💾 Pense à faire une sauvegarde (réglages ⚙️)";
 }
@@ -189,7 +208,8 @@ function openEd(s){
   if(s?.blob)setBlob(s.blob);dE.showModal();
 }
 $("#add").onclick=()=>openEd();
-$("#ed").onclick=()=>{edit=!edit;render()};
+$("#ed").onclick=()=>{edit=!edit;sel=false;picked.clear();render()};
+$("#sh").onclick=()=>{sel=!sel;edit=false;picked.clear();render()};
 $("#imp").onclick=()=>$("#file").click();
 $("#file").onchange=async e=>{const f=e.target.files[0];if(!f)return;try{await setBlob(f);if(!$("#nm").value)$("#nm").value=f.name.replace(/\.[^.]+$/,"").slice(0,30)}catch{alert("Format audio non lisible.")}e.target.value=""};
 $("#rec").onclick=async()=>{
@@ -218,13 +238,26 @@ function wav(b,a,e){const sr=b.sampleRate,i0=Math.floor(a*sr),n=Math.floor(e*sr)
   return new Blob([o],{type:"audio/wav"})}
 $("#shr").onclick=async()=>{if(!cbuf)return alert("Pas de son à partager.");const o=edv(),f=new File([wav(cbuf,o.a,o.e)],($("#nm").value||"son")+".wav",{type:"audio/wav"});
   try{if(navigator.canShare({files:[f]}))await navigator.share({files:[f],title:f.name});else alert("Partage non disponible sur cet appareil.")}catch{}};
+$("#go").onclick=async()=>{
+  const fs=[],used={};
+  try{for(const s of sounds.filter(x=>picked.has(x.id))){const b=await bufOf(s),n=(s.name||"son").replace(/[\\/:*?"<>|]/g,"_"),k=used[n]=(used[n]||0)+1;
+      fs.push(new File([wav(b,s.a||0,s.e||b.duration)],n+(k>1?"-"+k:"")+".wav",{type:"audio/wav"}))}
+    if(!navigator.canShare?.({files:fs}))return alert("Le partage de fichiers n’est pas disponible sur cet appareil.");
+    await navigator.share({files:fs,title:"Perroquitos"});sel=false;picked.clear();render()}
+  catch(e){if(e.name!=="AbortError")alert("Partage impossible : "+e.message)}
+};
+function pills(){document.querySelectorAll("select.pill").forEach(s=>{
+  let d=s.nextElementSibling;
+  if(!d||!d.classList.contains("popts")){d=document.createElement("div");d.className="popts";s.after(d);s.hidden=true;
+    [...s.options].forEach(o=>{const b=document.createElement("button");b.className="popt";b.type="button";b.dataset.v=o.value;b.textContent=o.textContent;b.onclick=()=>{s.value=o.value;s.dispatchEvent(new Event("change"));pills()};d.append(b)})}
+  d.querySelectorAll(".popt").forEach(b=>b.classList.toggle("on",b.dataset.v===s.value))})}
 $("#mv").oninput=()=>{S.vol=$("#mv").value/100;vol();save()};
 $("#vb").onchange=()=>{S.vib=$("#vb").checked;save()};
 
 /* réglages et sauvegardes */
 const b64=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
 let curTab="son",lock;
-function tab(t){curTab=t;document.querySelectorAll("#dS section").forEach(s=>s.hidden=s.dataset.t!==t);document.querySelectorAll("#stabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t))}
+function tab(t){curTab=t;document.querySelectorAll("#dS section").forEach(s=>s.hidden=s.dataset.t!==t);document.querySelectorAll("#stabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));$("#stabs .on")?.scrollIntoView({inline:"center",block:"nearest"})}
 $("#stabs").onclick=e=>{if(e.target.dataset.t)tab(e.target.dataset.t)};
 async function wl(){try{if(S.wake&&navigator.wakeLock&&document.visibilityState==="visible"&&!lock){lock=await navigator.wakeLock.request("screen");lock.onrelease=()=>lock=null}else if(!S.wake&&lock){await lock.release();lock=null}}catch{}}
 document.onvisibilitychange=wl;
@@ -235,7 +268,7 @@ $("#wk").onchange=async e=>{S.wake=e.target.checked;await save();wl()};
 $("#cf").onchange=async e=>{S.conf=e.target.checked;await save()};
 $("#up").onclick=async()=>{if(!confirm("Recharger la dernière version de l’appli ? Tes sons ne sont pas touchés."))return;
   try{const r=await navigator.serviceWorker?.getRegistration();await r?.unregister();for(const k of await caches.keys())await caches.delete(k)}catch{}location.reload()};
-async function openSet(){$("#th").value=S.theme;$("#pl").value=S.pal;$("#mx").value=S.max;$("#wk").checked=S.wake;$("#cf").checked=S.conf;tab(curTab);
+async function openSet(){$("#th").value=S.theme;$("#pl").value=S.pal;$("#mx").value=S.max;$("#wk").checked=S.wake;$("#cf").checked=S.conf;pills();tab(curTab);
   $("#mo").value=S.mode;$("#nc").value=S.cols;$("#mv").value=S.vol*100;$("#vb").checked=S.vib;$("#xc").innerHTML="";S.cats.forEach(c=>$("#xc").add(new Option(c.name,c.id)));if(cur!=="all")$("#xc").value=cur;
   const e=await navigator.storage?.estimate?.();
   $("#inf").textContent=`${sounds.length} sons`+(e?` · ${(e.usage/1e6).toFixed(1)} Mo utilisés`:"")+(S.last?` · dernier export : ${new Date(S.last).toLocaleDateString("fr-FR")}`:" · aucun export");
